@@ -18,52 +18,110 @@
     </header>
     <section>
         <h2>Overview</h2>
-        <p>This enhancement focuses on improving the software design and engineering principles within my Android Studio project.</p>
+        <p>
+            This enhancement focuses on improving the **software design structure** of my Android Studio project, 
+            **GravityGauge**. The goal was to improve modularity, maintainability, and adherence to best practices 
+            in software design.
+        </p>
 
-        <h2>Original Implementation</h2>
-        <p>Initially, the project had issues with modularity, maintainability, and scalability. The following areas needed improvement:</p>
+        <h2>Project Structure After Enhancements</h2>
+        <p>
+            Below is the **current structure** of the project, showing the improved organization of activities, database management, 
+            and layout resources:
+        </p>
+        <img src="artifact1structure.png" alt="Updated Project Structure" style="width:80%; display:block; margin:auto; border:1px solid #ccc; padding: 5px;">
+        <p>
+            The improved structure separates concerns effectively, making the codebase **more scalable** and **easier to maintain**.
+        </p>
+
+        <h2>What Was Changed?</h2>
+        <p>Previously, the project had issues such as:</p>
         <ul>
-            <li>Separation of concerns (MVC or MVVM pattern)</li>
-            <li>Better class structuring</li>
-            <li>Code reusability & refactoring</li>
+            <li>All logic being **crammed into activities**, causing bloated code.</li>
+            <li>No clear separation between UI logic, data handling, and business logic.</li>
+            <li>Code reuse was **minimal**, leading to redundant methods across multiple files.</li>
         </ul>
 
         <h2>Enhancements Made</h2>
-        <p>The following modifications were implemented to enhance software design:</p>
+        <p>To improve the project’s structure, I implemented the following changes:</p>
+        <ul>
+            <li><strong>Separation of Concerns:</strong> Moved database logic to `DatabaseManager.java` to prevent direct database interactions in UI components.</li>
+            <li><strong>Encapsulation:</strong> Introduced `WeightEntryAdapter.java` for handling RecyclerView operations cleanly.</li>
+            <li><strong>Better UI Organization:</strong> Created separate XML layout files for each activity for better maintainability.</li>
+            <li><strong>Improved Naming Conventions:</strong> Standardized class names (`WeightDataActivity`, `NotificationSettingsActivity`) for better readability.</li>
+        </ul>
+
+        <h2>Code Example: Before vs. After</h2>
+        <p>
+            Below is a comparison of how the **database interaction** was previously handled vs. how it’s managed now:
+        </p>
+
+        <h3>Before Enhancement (Code in Activity, No Separation)</h3>
         <pre>
-        // Example: Before Refactoring
         public class MainActivity extends AppCompatActivity {
-            private DatabaseHelper dbHelper;
+            private SQLiteDatabase db;
             private Button btn;
+
             @Override
             protected void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
                 setContentView(R.layout.activity_main);
-                dbHelper = new DatabaseHelper(this);
+                db = openOrCreateDatabase("GravityGaugeDB", MODE_PRIVATE, null);
                 btn = findViewById(R.id.button);
-                btn.setOnClickListener(view -> dbHelper.insertData("Sample"));
+                
+                btn.setOnClickListener(view -> {
+                    db.execSQL("INSERT INTO weight_entries (weight) VALUES (180)");
+                });
             }
         }
         </pre>
 
+        <h3>After Enhancement (Using `DatabaseManager.java` for Data Handling)</h3>
         <pre>
-        // After Refactoring: Using MVVM
-        public class MainViewModel extends ViewModel {
-            private DatabaseRepository repository;
-            public MainViewModel() {
-                repository = new DatabaseRepository();
+        public class DatabaseManager {
+            private SQLiteDatabase db;
+
+            public DatabaseManager(Context context) {
+                db = context.openOrCreateDatabase("GravityGaugeDB", Context.MODE_PRIVATE, null);
             }
-            public void insertData(String data) {
-                repository.insertData(data);
+
+            public void insertWeightEntry(int weight) {
+                db.execSQL("INSERT INTO weight_entries (weight) VALUES (" + weight + ")");
+            }
+        }
+
+        public class MainActivity extends AppCompatActivity {
+            private DatabaseManager dbManager;
+            private Button btn;
+
+            @Override
+            protected void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+                setContentView(R.layout.activity_main);
+                dbManager = new DatabaseManager(this);
+                btn = findViewById(R.id.button);
+                
+                btn.setOnClickListener(view -> dbManager.insertWeightEntry(180));
             }
         }
         </pre>
 
         <h2>Impact of the Enhancement</h2>
-        <p>By implementing the MVVM pattern, the project now follows better design principles, making the codebase more maintainable and scalable.</p>
+        <p>
+            By restructuring the project, I significantly improved:
+        </p>
+        <ul>
+            <li>🔹 **Code readability** – Files are now logically separated by purpose.</li>
+            <li>🔹 **Maintainability** – UI logic and database interactions are decoupled.</li>
+            <li>🔹 **Scalability** – Easier to add new features without modifying multiple files.</li>
+        </ul>
 
         <h2>Conclusion</h2>
-        <p>This enhancement significantly improved the software design quality of the project, aligning with industry best practices.</p>
+        <p>
+            These enhancements bring **modularity, organization, and efficiency** to the **GravityGauge** project. 
+            By following best practices in **software design**, the project is now better suited for future development.
+        </p>
     </section>
 </body>
 </html>
+
