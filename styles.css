@@ -33,3 +33,14 @@ section {
 h1, h2 {
     color: #333;
 }
+
+
+.artifact-list {
+    list-style: none; /* Removes bullet points */
+    padding: 0;
+    text-align: center; /* Centers the list */
+}
+
+.artifact-list li {
+    margin: 10px 0; /* Adds space between items */
+}
