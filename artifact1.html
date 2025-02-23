@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artifact 1 - Software Design</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Artifact 1: Software Design & Engineering</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="artifacts.html">Artifacts</a>
+            <a href="self-assessment.html">Self-Assessment</a>
+            <a href="code-review.html">Code Review</a>
+        </nav>
+    </header>
+    <section>
+        <h2>Overview</h2>
+        <p>This enhancement focuses on improving the software design and engineering principles within my Android Studio project.</p>
+
+        <h2>Original Implementation</h2>
+        <p>Initially, the project had issues with modularity, maintainability, and scalability. The following areas needed improvement:</p>
+        <ul>
+            <li>Separation of concerns (MVC or MVVM pattern)</li>
+            <li>Better class structuring</li>
+            <li>Code reusability & refactoring</li>
+        </ul>
+
+        <h2>Enhancements Made</h2>
+        <p>The following modifications were implemented to enhance software design:</p>
+        <pre>
+        // Example: Before Refactoring
+        public class MainActivity extends AppCompatActivity {
+            private DatabaseHelper dbHelper;
+            private Button btn;
+            @Override
+            protected void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+                setContentView(R.layout.activity_main);
+                dbHelper = new DatabaseHelper(this);
+                btn = findViewById(R.id.button);
+                btn.setOnClickListener(view -> dbHelper.insertData("Sample"));
+            }
+        }
+        </pre>
+
+        <pre>
+        // After Refactoring: Using MVVM
+        public class MainViewModel extends ViewModel {
+            private DatabaseRepository repository;
+            public MainViewModel() {
+                repository = new DatabaseRepository();
+            }
+            public void insertData(String data) {
+                repository.insertData(data);
+            }
+        }
+        </pre>
+
+        <h2>Impact of the Enhancement</h2>
+        <p>By implementing the MVVM pattern, the project now follows better design principles, making the codebase more maintainable and scalable.</p>
+
+        <h2>Conclusion</h2>
+        <p>This enhancement significantly improved the software design quality of the project, aligning with industry best practices.</p>
+    </section>
+</body>
+</html>
