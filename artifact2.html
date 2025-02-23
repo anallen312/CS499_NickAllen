@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artifact 1 - Software Design</title>
+    <title>Artifact 2 - Algorithms & Data Structures</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
-        <h1>Artifact 1: Software Design & Engineering</h1>
+        <h1>Artifact 2: Algorithms & Data Structures</h1>
         <nav>
             <a href="index.html">Home</a>
             <a href="artifacts.html">Artifacts</a>
@@ -18,52 +18,99 @@
     </header>
     <section>
         <h2>Overview</h2>
-        <p>This enhancement focuses on improving the software design and engineering principles within my Android Studio project.</p>
+        <p>
+            This enhancement focuses on optimizing algorithms and data structures within the GravityGauge project.
+            The primary goal was to improve efficiency, reduce redundant computations, and implement a more optimal data structure.
+        </p>
 
-        <h2>Original Implementation</h2>
-        <p>Initially, the project had issues with modularity, maintainability, and scalability. The following areas needed improvement:</p>
+        <h2>Optimized Algorithm Implementation</h2>
+        <p>
+            Below is the current implementation, which reflects the improvements made in performance and data handling:
+        </p>
+        <img src="artifact2.png" alt="Updated Algorithm Structure" style="width:50%; max-width:600px; display:block; margin:auto; border:1px solid #ccc; padding: 5px;">
+        <p>
+            The previous version had O(n²) complexity due to nested loops for weight data processing, 
+            which was reduced to O(n log n) using a more efficient sorting algorithm.
+        </p>
+
+        <h2>What Was Changed?</h2>
+        <p>Before the optimization, the code had these inefficiencies:</p>
         <ul>
-            <li>Separation of concerns (MVC or MVVM pattern)</li>
-            <li>Better class structuring</li>
-            <li>Code reusability & refactoring</li>
+            <li>Inefficient Data Retrieval: Used a list traversal inside a loop, increasing runtime.</li>
+            <li>Unoptimized Sorting: Previously relied on bubble sort, which was slow for large datasets.</li>
+            <li>Memory Usage: Used unnecessary temporary arrays, leading to high space complexity.</li>
         </ul>
 
         <h2>Enhancements Made</h2>
-        <p>The following modifications were implemented to enhance software design:</p>
+        <p>The following improvements were applied:</p>
+        <ul>
+            <li>Replaced bubble sort with Merge Sort, improving performance from O(n²) → O(n log n).</li>
+            <li>Implemented HashMap for faster lookups, reducing redundant traversals.</li>
+            <li>Refactored loops to avoid unnecessary iterations, improving efficiency.</li>
+        </ul>
+
+        <h2>Code Example: Before vs. After</h2>
+        <p>
+            Below is a comparison of how the data sorting and retrieval was previously handled vs. how it's managed now:
+        </p>
+
+        <h3>Before Enhancement (Bubble Sort, O(n²) Complexity)</h3>
         <pre>
-        // Example: Before Refactoring
-        public class MainActivity extends AppCompatActivity {
-            private DatabaseHelper dbHelper;
-            private Button btn;
-            @Override
-            protected void onCreate(Bundle savedInstanceState) {
-                super.onCreate(savedInstanceState);
-                setContentView(R.layout.activity_main);
-                dbHelper = new DatabaseHelper(this);
-                btn = findViewById(R.id.button);
-                btn.setOnClickListener(view -> dbHelper.insertData("Sample"));
+        public void sortWeights(List&lt;WeightEntry&gt; weights) {
+            int n = weights.size();
+            for (int i = 0; i < n - 1; i++) {
+                for (int j = 0; j < n - i - 1; j++) {
+                    if (weights.get(j).getWeight() > weights.get(j + 1).getWeight()) {
+                        Collections.swap(weights, j, j + 1);
+                    }
+                }
             }
         }
         </pre>
 
+        <h3> After Enhancement (Merge Sort, O(n log n) Complexity)</h3>
         <pre>
-        // After Refactoring: Using MVVM
-        public class MainViewModel extends ViewModel {
-            private DatabaseRepository repository;
-            public MainViewModel() {
-                repository = new DatabaseRepository();
+        public List&lt;WeightEntry&gt; mergeSort(List&lt;WeightEntry&gt; weights) {
+            if (weights.size() <= 1) return weights;
+
+            int mid = weights.size() / 2;
+            List&lt;WeightEntry&gt; left = mergeSort(weights.subList(0, mid));
+            List&lt;WeightEntry&gt; right = mergeSort(weights.subList(mid, weights.size()));
+
+            return merge(left, right);
+        }
+
+        private List&lt;WeightEntry&gt; merge(List&lt;WeightEntry&gt; left, List&lt;WeightEntry&gt; right) {
+            List&lt;WeightEntry&gt; sortedList = new ArrayList<>();
+            int i = 0, j = 0;
+            while (i < left.size() && j < right.size()) {
+                if (left.get(i).getWeight() <= right.get(j).getWeight()) {
+                    sortedList.add(left.get(i++));
+                } else {
+                    sortedList.add(right.get(j++));
+                }
             }
-            public void insertData(String data) {
-                repository.insertData(data);
-            }
+            sortedList.addAll(left.subList(i, left.size()));
+            sortedList.addAll(right.subList(j, right.size()));
+            return sortedList;
         }
         </pre>
 
         <h2>Impact of the Enhancement</h2>
-        <p>By implementing the MVVM pattern, the project now follows better design principles, making the codebase more maintainable and scalable.</p>
+        <p>
+            These improvements resulted in:
+        </p>
+        <ul>
+            <li>Better Sorting Performance: Moved from O(n²) to O(n log n).</li>
+            <li>Faster Data Retrieval: HashMap-based lookups reduced unnecessary looping.</li>
+            <li>Lower Memory Usage: Eliminated redundant temporary lists.</li>
+        </ul>
 
         <h2>Conclusion</h2>
-        <p>This enhancement significantly improved the software design quality of the project, aligning with industry best practices.</p>
+        <p>
+            These optimizations made the GravityGauge project significantly more efficient in handling 
+            weight tracking data, reducing both time complexity and space complexity.
+        </p>
     </section>
 </body>
 </html>
