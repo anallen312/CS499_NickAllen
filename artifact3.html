@@ -3,67 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artifact 1 - Software Design</title>
+    <title>Artifact 3 - Database & Chart Integration</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
-        <h1>Artifact 1: Software Design & Engineering</h1>
+        <h1>Artifact 3: Database and Chart Integration</h1>
         <nav>
             <a href="index.html">Home</a>
+            <a href="code-review.html">Code Review</a>
             <a href="artifacts.html">Artifacts</a>
             <a href="self-assessment.html">Self-Assessment</a>
-            <a href="code-review.html">Code Review</a>
         </nav>
     </header>
     <section>
         <h2>Overview</h2>
-        <p>This enhancement focuses on improving the software design and engineering principles within my Android Studio project.</p>
+        <p>
+            This enhancement focused on integrating a database-backed charting system into the GravityGauge project.
+            The new implementation retrieves stored weight data from an SQLite database and visualizes weight trends 
+            over time using MPAndroidChart.
+        </p>
 
-        <h2>Original Implementation</h2>
-        <p>Initially, the project had issues with modularity, maintainability, and scalability. The following areas needed improvement:</p>
-        <ul>
-            <li>Separation of concerns (MVC or MVVM pattern)</li>
-            <li>Better class structuring</li>
-            <li>Code reusability & refactoring</li>
-        </ul>
+        <h2>Database Query for Chart Data</h2>
+        <p>The following function retrieves all weight entries from the database, sorting them by most recent first.</p>
+        <img src="chartdatabasequery.png" alt="Database Query for Chart Data" style="width:50%; max-width:600px; display:block; margin:auto; border:1px solid #ccc; padding: 5px;">
 
-        <h2>Enhancements Made</h2>
-        <p>The following modifications were implemented to enhance software design:</p>
+        <h3>Code: Retrieving Weight Data from SQLite</h3>
         <pre>
-        // Example: Before Refactoring
-        public class MainActivity extends AppCompatActivity {
-            private DatabaseHelper dbHelper;
-            private Button btn;
-            @Override
-            protected void onCreate(Bundle savedInstanceState) {
-                super.onCreate(savedInstanceState);
-                setContentView(R.layout.activity_main);
-                dbHelper = new DatabaseHelper(this);
-                btn = findViewById(R.id.button);
-                btn.setOnClickListener(view -> dbHelper.insertData("Sample"));
+        public List<WeightEntry> getAllWeightEntries() {
+            List<WeightEntry> weightEntries = new ArrayList<>();
+            SQLiteDatabase db = this.getReadableDatabase();
+
+            String selectQuery = "SELECT * FROM " + TABLE_WEIGHT_ENTRIES + " ORDER BY id DESC";
+            Cursor cursor = db.rawQuery(selectQuery, null);
+
+            int idIndex = cursor.getColumnIndex(KEY_ENTRY_ID);
+            int dateIndex = cursor.getColumnIndex(KEY_DATE);
+            int weightIndex = cursor.getColumnIndex(KEY_WEIGHT);
+
+            if (idIndex != -1 && dateIndex != -1 && weightIndex != -1) {
+                if (cursor.moveToFirst()) {
+                    do {
+                        WeightEntry entry = new WeightEntry();
+                        entry.setId(cursor.getInt(idIndex));
+                        entry.setDate(cursor.getString(dateIndex));
+                        entry.setWeight(cursor.getDouble(weightIndex));
+                        weightEntries.add(entry);
+                    } while (cursor.moveToNext());
+                }
+            } else {
+                Log.e("DatabaseManager", "Error: Column indices are invalid.");
             }
+            cursor.close();
+            db.close();
+            return weightEntries;
         }
         </pre>
 
+        <h2>Loading Data into MPAndroidChart</h2>
+        <p>Once the weight data is retrieved, it is passed to MPAndroidChart for visualization.</p>
+        <img src="loadchartdata.png" alt="Loading Chart Data" style="width:50%; max-width:600px; display:block; margin:auto; border:1px solid #ccc; padding: 5px;">
+
+        <h3>Code: Loading Weight Data into Chart</h3>
         <pre>
-        // After Refactoring: Using MVVM
-        public class MainViewModel extends ViewModel {
-            private DatabaseRepository repository;
-            public MainViewModel() {
-                repository = new DatabaseRepository();
+        private void loadChartData() {
+            List<WeightEntry> weightEntries = dbManager.getAllWeightEntries();
+            ArrayList<Entry> entries = new ArrayList<>();
+
+            for (int i = 0; i < weightEntries.size(); i++) {
+                float xValue = i;
+                float yValue = (float) weightEntries.get(i).getWeight();
+                entries.add(new Entry(xValue, yValue));
             }
-            public void insertData(String data) {
-                repository.insertData(data);
-            }
+
+            LineDataSet lineDataSet = new LineDataSet(entries, "Weight Over Time");
+            lineDataSet.setLineWidth(2f);
+            lineDataSet.setCircleRadius(4f);
+            lineDataSet.setValueTextSize(10f);
+
+            LineData lineData = new LineData(lineDataSet);
+            lineChart.setData(lineData);
+
+            Description description = new Description();
+            description.setText("Weight Trend");
+            lineChart.setDescription(description);
+            lineChart.invalidate();
         }
+        </pre>
+
+        <h2>Moving Average Calculation for Trends</h2>
+        <p>
+            To improve trend analysis, a moving average algorithm was implemented. This function calculates 
+            the weekly weight trend, allowing users to track gradual changes.
+        </p>
+        <img src="chartmovingaverage.png" alt="Moving Average Calculation for Chart Trends" style="width:50%; max-width:600px; display:block; margin:auto; border:1px solid #ccc; padding: 5px;">
+
+        <h2>UI Updates: Chart Navigation</h2>
+        <p>
+            A new "View Weight Chart" button was added to activity_weight_data.xml to allow users to 
+            navigate to the weight chart screen.
+        </p>
+        <img src="chartnavigation.png" alt="Updated Navigation for Chart" style="width:50%; max-width:600px; display:block; margin:auto; border:1px solid #ccc; padding: 5px;">
+
+        <h3>Code: Navigating to Chart Screen</h3>
+        <pre>
+        viewChartButton.setOnClickListener(v -> {
+            Intent intent = new Intent(WeightDataActivity.this, WeightChartActivity.class);
+            startActivity(intent);
+        });
+        </pre>
+
+        <h2>MPAndroidChart Display</h2>
+        <p>Below is the final implementation of the weight trend chart.</p>
+        <img src="weightchartdisplay.png" alt="MPAndroidChart Display" style="width:50%; max-width:600px; display:block; margin:auto; border:1px solid #ccc; padding: 5px;">
+
+        <h2>Fixing Navigation and Preventing App Crashes</h2>
+        <p>
+            During testing, the app crashed when trying to open the weight chart screen. 
+            The issue was traced to a missing activity declaration in AndroidManifest.xml.
+        </p>
+        <img src="chartcrashfix.png" alt="Fixing Chart Activity Crash" style="width:50%; max-width:600px; display:block; margin:auto; border:1px solid #ccc; padding: 5px;">
+
+        <h3>Code: Registering Activity in Manifest</h3>
+        <pre>
+        <activity android:name=".WeightChartActivity"/>
         </pre>
 
         <h2>Impact of the Enhancement</h2>
-        <p>By implementing the MVVM pattern, the project now follows better design principles, making the codebase more maintainable and scalable.</p>
+        <p>
+            These improvements resulted in:
+        </p>
+        <ul>
+            <li>Database-driven weight tracking for long-term progress visualization.</li>
+            <li>Real-time chart updates using MPAndroidChart.</li>
+            <li>A moving average algorithm to smooth out short-term fluctuations.</li>
+            <li>Better user experience with clear navigation and interactive elements.</li>
+        </ul>
 
         <h2>Conclusion</h2>
-        <p>This enhancement significantly improved the software design quality of the project, aligning with industry best practices.</p>
+        <p>
+            By integrating database-driven charting functionality, improving navigation, and adding trend analysis, 
+            the GravityGauge app now provides a more comprehensive and visually intuitive way to track weight changes over time.
+        </p>
     </section>
 </body>
 </html>
