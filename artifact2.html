@@ -20,17 +20,18 @@
         <h2>Overview</h2>
         <p>
             This enhancement improves the data processing and algorithmic functionality within the GravityGauge project. 
-            The key improvement was implementing a moving average algorithm to track weight trends over time. Additionally, 
+            The key improvement was implementing an average weight change algorithm to track weight trends over time. Additionally, 
             the user interface was updated to present this data in a more structured format.
         </p>
 
-        <h2>Implemented Moving Average Algorithm</h2>
-        <p>Below is the updated algorithm implementation:</p>
-        <img src="artifact2.png" alt="Updated Moving Average Algorithm" style="width:50%; max-width:600px; display:block; margin:auto; border:1px solid #ccc; padding: 5px;">
+        <h2>Weekly Average Weight Change Implementation</h2>
+        <p>The following function retrieves the last seven weight entries and calculates the average daily weight change over that period:</p>
+        <img src="artifact2.png" alt="Weekly Average Weight Change Algorithm" style="width:50%; max-width:600px; display:block; margin:auto; border:1px solid #ccc; padding: 5px;">
+
         <p>
-            This function calculates the weekly weight trend, allowing users to see if they are gaining or losing weight over time. 
-            A testing mode was also added to allow calculations to be based on either the last seven real-world days or the 
-            last seven weight entries for easier debugging.
+            The function pulls all entries from the last seven days, then calculates the difference between each consecutive entry. 
+            The total change is divided by the number of days counted to provide a daily trend. This allows users to see if their 
+            weight is trending upward or downward.
         </p>
 
         <h2>Testing Mode Implementation</h2>
@@ -42,84 +43,76 @@
         <h2>Changes Implemented</h2>
         <p>Before this enhancement, the application lacked a way to analyze long-term weight trends. The following changes were made:</p>
         <ul>
-            <li>Added a moving average algorithm to DatabaseManager.java.</li>
-            <li>Updated activity_weight_data.xml to display the computed weight trend.</li>
-            <li>Modified getAllWeightEntries() to sort entries with the newest first.</li>
-            <li>Enabled a vertical scrollbar in RecyclerView for better navigation.</li>
+            <li>Added `getLast7DaysEntries()` to retrieve the last seven days of weight data.</li>
+            <li>Created `calculateWeeklyAverageChange()` to determine the average daily weight change over a week.</li>
+            <li>Updated `activity_weight_data.xml` to display the computed weight trend.</li>
+            <li>Modified `getAllWeightEntries()` to sort entries with the newest first.</li>
+            <li>Enabled a vertical scrollbar in `RecyclerView` for better navigation.</li>
             <li>Verified SQLite database functionality using Android Studio's Database Inspector.</li>
         </ul>
 
-        <h2>Code Example: Before vs. After</h2>
+        <h2>Code Example: Weekly Average Weight Change</h2>
 
-        <h3>Before Enhancement (No Moving Average Calculation)</h3>
+        <h3>Retrieving Last 7 Days of Entries</h3>
         <pre>
-        public List<WeightEntry> getAllWeightEntries() {
-            List<WeightEntry> entries = new ArrayList<>();
+        public List<WeightEntry> getLast7DaysEntries() {
+            List<WeightEntry> weightEntries = new ArrayList<>();
             SQLiteDatabase db = this.getReadableDatabase();
-            Cursor cursor = db.rawQuery("SELECT * FROM weight_entries", null);
 
-            if (cursor.moveToFirst()) {
-                do {
-                    entries.add(new WeightEntry(cursor.getInt(0), cursor.getInt(1)));
-                } while (cursor.moveToNext());
+            String query = "SELECT * FROM " + TABLE_WEIGHT_ENTRIES + " WHERE date >= date('now', '-7 days') ORDER BY date ASC";
+            Cursor cursor = db.rawQuery(query, null);
+
+            int dateIndex = cursor.getColumnIndex(KEY_DATE);
+            int weightIndex = cursor.getColumnIndex(KEY_WEIGHT);
+
+            if (dateIndex != -1 && weightIndex != -1) {
+                if (cursor.moveToFirst()) {
+                    do {
+                        WeightEntry entry = new WeightEntry();
+                        entry.setDate(cursor.getString(dateIndex));
+                        entry.setWeight(cursor.getDouble(weightIndex));
+                        weightEntries.add(entry);
+                    } while (cursor.moveToNext());
+                }
+            } else {
+                Log.e("DatabaseManager", "Error: Column indices are invalid.");
             }
             cursor.close();
             db.close();
-            return entries;
+            return weightEntries;
         }
         </pre>
 
-        <h3>After Enhancement (Moving Average Implemented)</h3>
+        <h3>Calculating Weekly Average Weight Change</h3>
         <pre>
-        private List<WeightEntry> weightCache = null;
+        public double calculateWeeklyAverageChange(boolean useLastSevenEntries) {
+            List<WeightEntry> entries = getLast7DaysEntries();
+            if (entries.size() < 2) return 0; // Not enough data to calculate change
 
-        public List<WeightEntry> getWeightEntries() {
-            if (weightCache != null) {
-                return weightCache;
+            double totalChange = 0;
+            int daysCounted = 0;
+
+            for (int i = 1; i < entries.size(); i++) {
+                totalChange += entries.get(i).getWeight() - entries.get(i - 1).getWeight();
+                daysCounted++;
             }
 
-            weightCache = new ArrayList<>();
-            try (SQLiteDatabase db = this.getReadableDatabase();
-                 Cursor cursor = db.rawQuery("SELECT * FROM weight_entries", null)) {
-                while (cursor.moveToNext()) {
-                    weightCache.add(new WeightEntry(cursor.getInt(0), cursor.getInt(1)));
-                }
-            }
-            return weightCache;
-        }
-
-        public double getMovingAverage(boolean testMode) {
-            List<Double> weights = new ArrayList<>();
-            SQLiteDatabase db = this.getReadableDatabase();
-            String query = testMode 
-                ? "SELECT weight FROM weight_entries ORDER BY id DESC LIMIT 7"
-                : "SELECT weight FROM weight_entries WHERE date >= date('now', '-7 days')";
-            Cursor cursor = db.rawQuery(query, null);
-
-            while (cursor.moveToNext()) {
-                weights.add(cursor.getDouble(0));
-            }
-            cursor.close();
-
-            if (weights.isEmpty()) return 0.0;
-            double sum = 0.0;
-            for (double weight : weights) sum += weight;
-            return sum / weights.size();
+            return (daysCounted > 0) ? totalChange / daysCounted : 0;
         }
         </pre>
 
         <h2>Enhancing UI: Displaying Weekly Trends</h2>
         <p>
-            A new TextView was added to activity_weight_data.xml to display the weekly average weight change.
-            The moving average function updates dynamically when a new weight entry is added.
+            A new TextView was added to `activity_weight_data.xml` to display the weekly average weight change.
+            The calculated trend updates dynamically whenever a new weight entry is added.
         </p>
         <img src="activityweightdata.png" alt="Updated XML Layout for Weight Data Screen" style="width:50%; max-width:600px; display:block; margin:auto; border:1px solid #ccc; padding: 5px;">
 
         <h3>Updated UI Code in WeightDataActivity.java</h3>
         <pre>
         private void updateWeightTrend() {
-            double avgChange = dbManager.getMovingAverage(false);
-            avgWeightChangeTextView.setText("Weekly Average Change: " + avgChange + " lbs");
+            double avgChange = dbManager.calculateWeeklyAverageChange(false);
+            avgWeightChangeTextView.setText("Avg Daily Change: " + avgChange + " lbs");
         }
         </pre>
 
@@ -135,10 +128,10 @@
 
         <h2>Conclusion</h2>
         <p>
-            By adding a moving average algorithm, testing mode, and improving UI responsiveness, the GravityGauge app is now more effective 
-            at tracking user weight trends. These enhancements improved both algorithmic efficiency and user experience.
+            By adding an algorithm to calculate average weight change, introducing a testing mode, and improving UI responsiveness, 
+            the GravityGauge app now provides a clearer picture of weight trends. These enhancements improved both algorithmic efficiency 
+            and user experience.
         </p>
     </section>
 </body>
 </html>
-
