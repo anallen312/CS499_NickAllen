@@ -57,6 +57,12 @@ section {
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Paragraph Text - Slightly Larger for Readability */
+p {
+    font-size: 1.1em; /* Slightly larger text */
+    line-height: 1.6; /* Improves readability */
+}
+
 /* Headings */
 h2 {
     color: #2b5876;
@@ -80,36 +86,4 @@ button, .btn {
     background-color: #468faf;
     color: white;
     border: none;
-    padding: 10px 15px;
-    font-size: 1em;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-button:hover, .btn:hover {
-    background-color: #386fa4;
-}
-
-/* Image Styling */
-img {
-    display: block;
-    margin: 15px auto;
-    max-width: 100%;
-    border-radius: 5px;
-}
-
-/* Artifact List Styling */
-.artifact-list {
-    list-style: none; /* Remove bullets */
-    padding: 0;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: left; /* Align items to the left */
-}
-
-.artifact-list li {
-    margin: 10px 0;
-    text-align: left; /* Ensure text is left-aligned */
-}
-
+    padding: 10px
