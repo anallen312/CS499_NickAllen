@@ -1,50 +1,98 @@
+/* General Styling */
 body {
     font-family: Arial, sans-serif;
+    background-color: #f4f7f9;
+    color: #333;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
-    color: #333;
 }
 
+/* Header with Soft Blue Gradient */
 header {
-    background: linear-gradient(to right, #ff4500, #ff9900);
+    background: linear-gradient(to right, #3a7bd5, #3a6073);
     color: white;
-    padding: 15px 0;
+    padding: 20px 0;
     text-align: center;
+    font-size: 1.5em;
+    font-weight: bold;
 }
 
+/* Navigation Bar */
 nav {
-    text-align: center;
-    padding: 10px;
+    margin-top: 10px;
 }
-
 nav a {
     color: white;
     text-decoration: none;
     margin: 0 15px;
+    font-size: 1em;
     font-weight: bold;
+    transition: 0.3s;
+}
+nav a:hover {
+    color: #d4e9ff;
 }
 
+/* Section Styling */
 section {
+    background: white;
+    margin: 30px auto;
     padding: 20px;
-    text-align: left;
+    max-width: 900px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Headings */
 h1, h2 {
-    color: #333;
+    color: #2b5876;
+    text-align: center;
 }
 
+/* Links */
+a {
+    color: #0077b6;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+/* Buttons */
+button, .btn {
+    background-color: #468faf;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 1em;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+button:hover, .btn:hover {
+    background-color: #386fa4;
+}
+
+/* Image Styling */
+img {
+    display: block;
+    margin: 15px auto;
+    max-width: 100%;
+    border-radius: 5px;
+}
+
+/* Artifact List Styling */
 .artifact-list {
     list-style: none; /* Remove bullets */
     padding: 0;
-    margin: 0 auto; /* left list */
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
-    align-items: left; /* Center left items horizontally */
+    align-items: left; /* Align items to the left */
 }
 
 .artifact-list li {
     margin: 10px 0;
-    text-align: left; /* Ensure text is left */
+    text-align: left; /* Ensure text is left-aligned */
 }
 
